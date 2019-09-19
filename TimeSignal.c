@@ -12,12 +12,12 @@ static float totalTimeOfAllSignals = 0;
 struct timeval programStart;
 struct timeval programEnd;
 
+struct timeval signalStart;
+struct timeval signalEnd;
+
 void handle_sigfpe(int signum){
 
-	struct timeval signalStart;
-	struct timeval signalEnd;
-
-	gettimeofday(&signalStart, NULL);
+	gettimeofday(&signalEnd, NULL);
 
 	if(exceptionsCount == 0){
 		gettimeofday(&programEnd, NULL);
@@ -36,13 +36,13 @@ void handle_sigfpe(int signum){
 		exit(0);
 	}	
 
-	gettimeofday(&signalEnd, NULL);
+	exceptionsCount -= 1;
 
 	float signalSeconds = (signalEnd.tv_sec - signalStart.tv_sec);
 	float signalMicroseconds = ((signalSeconds * 1000000) + signalEnd.tv_usec) - (signalStart.tv_usec);	
 	totalTimeOfAllSignals += signalMicroseconds;	
 
-	exceptionsCount -= 1;
+	gettimeofday(&signalStart, NULL);
 }
 
 int main(int argc, char *argv[]){	
@@ -54,6 +54,8 @@ int main(int argc, char *argv[]){
 	int z = 0;
 	
 	signal(SIGFPE, handle_sigfpe);
+
+	gettimeofday(&signalStart, NULL);
 	z = x / y;
 	z++;
 	return 0;
